@@ -5,9 +5,15 @@ const pool = new pg.Pool({
   host: process.env.DB_HOST || 'localhost',
   port: Number(process.env.DB_PORT) || 5432,
   user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || '', // Récupère le mot de passe depuis le .env
+  password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'gestion_examens'
 });
+
+export const findAll = async (): Promise<Exam[]> => {
+    const result = await pool.query('SELECT * FROM exam');
+    
+    return result.rows as Exam[];
+};
 
 export const createExam = async (examData: Omit<Exam, 'id'>): Promise<Exam> => {
     const sql = `INSERT INTO exam (title, start_time, end_time) VALUES ($1, $2, $3) RETURNING id`;

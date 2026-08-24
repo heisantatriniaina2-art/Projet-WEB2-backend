@@ -18,8 +18,4 @@ export const authRepository = {
         const result = await pool.query(sql, values);
         return result.rows[0] || null;
     },
-
-    comparePasswords: async (password: string, hash: string): Promise<boolean> => {
-        return await bcrypt.compare(password, hash);
-    }
 }

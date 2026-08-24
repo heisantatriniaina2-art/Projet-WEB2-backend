@@ -6,10 +6,9 @@ export const authService = {
         if (!user || !password) {
             throw new Error('User or password not found');
         }
-        const isMatch = await authRepository.comparePasswords(password, user.password);
+        const isMatch = (password === user.password);
         if (!isMatch) {
             throw new Error('Invalid credentials');
         }
-        return user;
-    }
+            }
 };
