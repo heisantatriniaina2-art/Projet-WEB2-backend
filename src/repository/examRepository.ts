@@ -48,3 +48,8 @@ export const modifyExam = async (id: number, examData: Omit<Exam, 'id'>): Promis
 
     return result.rows[0];
 }
+
+export const deleteExam = async (id: number): Promise<boolean> => {
+    const result = await pool.query(`DELETE FROM exam WHERE id = $1`, [id]);
+    return (result.rowCount ?? 0) > 0;
+}

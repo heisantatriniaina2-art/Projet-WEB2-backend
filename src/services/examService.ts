@@ -1,5 +1,5 @@
 import type { Exam } from '../model/examModel.js';
-import { createExam, findAll, modifyExam } from '../repository/examRepository.js';
+import { createExam, deleteExam, findAll, modifyExam } from '../repository/examRepository.js';
 
 export const createNewExam = async (examData: Omit<Exam, 'id'>): Promise<Exam> => {
   return await createExam(examData);
@@ -11,4 +11,8 @@ export const getAllExams = async (): Promise<Exam[]> =>  {
 
 export const updateExam = async (id: number, examData: Omit<Exam, 'id'>): Promise<Exam | null> => {
   return await modifyExam(id, examData);
+}
+
+export const removeExam = async (id: number): Promise<boolean> => {
+  return await deleteExam(id);
 }
