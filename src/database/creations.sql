@@ -2,7 +2,8 @@ CREATE TYPE user_role AS ENUM ('admin', 'student');
 
 CREATE TABLE users(
     id SERIAL primary key,
-    name VARCHAR(50),
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
     email VARCHAR(50),
     password VARCHAR(50),
     role user_role  NOT NULL DEFAULT 'student',

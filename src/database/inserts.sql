@@ -1,13 +1,13 @@
 
 
-INSERT INTO users(name, email, password, role,is_active)
-            VALUES('Randria', 'Hery', 'hery@gmail.com', 'secure_pass', 'admin', TRUE);
+INSERT INTO users(first_name, last_name, email, password, role, is_active)
+            VALUES('Randria', 'Rakoto', 'hery@gmail.com', 'secure_pass', 'admin', TRUE);
 
-INSERT INTO users(name, email, password, role,is_active)
-            VALUES('Rakoto', 'Mamy', 'mamy@gmail.com', 'secure_pass', 'student', TRUE);
+INSERT INTO users(first_name, last_name, email, password, role, is_active)
+            VALUES('Rakoto', 'Ranaivo', 'mamy@gmail.com', 'secure_pass', 'student', TRUE);
 
             
-INSERT INTO users(name, email, password, role,is_active)
+INSERT INTO users(first_name, last_name, email, password, role, is_active)
             VALUES('Fitia', 'Anja', 'anja@gmail.com', 'secure_pass', 'student', TRUE);
             
 

@@ -2,10 +2,11 @@ import type { Exam } from '../model/examModel.js';
 import pg from 'pg';
 
 const pool = new pg.Pool({
-    host: 'localhost',
-    port: 5432,
-    user: 'postgres',
-    database: 'gestion_examens'
+  host: process.env.DB_HOST || 'localhost',
+  port: Number(process.env.DB_PORT) || 5432,
+  user: process.env.DB_USER || 'postgres',
+  password: process.env.DB_PASSWORD || '', // Récupère le mot de passe depuis le .env
+  database: process.env.DB_NAME || 'gestion_examens'
 });
 
 export const createExam = async (examData: Omit<Exam, 'id'>): Promise<Exam> => {
