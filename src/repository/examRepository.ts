@@ -30,3 +30,21 @@ export const createExam = async (examData: Omit<Exam, 'id'>): Promise<Exam> => {
         ...examData
     };
 };
+
+export const modifyExam = async (id: number, examData: Omit<Exam, 'id'>): Promise<Exam | null> => {
+    const sql = `
+    UPDATE exam 
+    SET title = $1, start_time = $2, end_time = $3 
+    WHERE id = $4 
+    RETURNING id, title, start_time, end_time`;
+    const values = [
+        examData.title,
+        examData.startTime,
+        examData.endTime,
+        id
+    ];
+
+    const result = await pool.query(sql, values);
+
+    return result.rows[0];
+}
