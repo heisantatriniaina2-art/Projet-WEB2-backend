@@ -21,6 +21,19 @@ export const findAllExams = async (): Promise<Exam[]> => {
     }));
 };
 
+export const findExamById = async (id: number): Promise<Exam | null> => {
+    const result = await pool.query('SELECT * FROM exam WHERE id = $1', [id]);
+
+    const row = result.rows[0];
+    return {
+        id: row.id,
+        title: row.title,
+        startTime: row.start_time,
+        endTime: row.end_time,
+        courseId: row.course_id
+    };
+}
+
 export const createExam = async (examData: Omit<Exam, 'id'>): Promise<Exam> => {
     const sql = `INSERT INTO exam (title, start_time, end_time) VALUES ($1, $2, $3) RETURNING id`;
     const values = [
