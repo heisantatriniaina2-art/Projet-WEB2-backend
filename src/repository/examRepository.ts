@@ -9,10 +9,16 @@ const pool = new pg.Pool({
   database: process.env.DB_NAME || 'gestion_examens'
 });
 
-export const findAll = async (): Promise<Exam[]> => {
-    const result = await pool.query('SELECT * FROM exam');
+export const findAllExams = async (): Promise<Exam[]> => {
+    const result = await pool.query('SELECT id, title, start_time, end_time, course_id FROM exam');
     
-    return result.rows as Exam[];
+    return result.rows.map(row => ({
+        id: row.id,
+        title: row.title,
+        startTime: row.start_time,
+        endTime: row.end_time,
+        courseId: row.course_id
+    }));
 };
 
 export const createExam = async (examData: Omit<Exam, 'id'>): Promise<Exam> => {
