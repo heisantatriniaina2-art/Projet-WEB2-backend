@@ -5,8 +5,9 @@ import { authController } from './controllers/authController.js';
 
 
 const app = express();
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
+
 
 app.post('/api/auth/login', authController.login);
 

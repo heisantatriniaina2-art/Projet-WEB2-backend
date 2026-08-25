@@ -1,27 +1,23 @@
-import pg from 'pg';
-import type { Course } from '../model/courseModel.js';
-
-const pool = new pg.Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: Number(process.env.DB_PORT) || 5432,
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'gestion_examens'
-});
+import type { Course } from "../model/courseModel.js";
+import { pool } from "../db";
 
 export const findAllCourses = async (): Promise<Course[]> => {
-const result = await pool.query('SELECT id, name, description FROM course');
+    const result = await pool.query(
+        "SELECT id, code, name, description FROM courses ORDER BY id"
+    );
 
-    return result.rows.map(row => ({
-        id: row.id,
-        name: row.name,
-        description: row.description
-    }));
+    return result.rows;
 };
 
+export const createCourse = async (
+    courseData: Omit<Course, "id">
+): Promise<Course> => {
+    const sql = `
+        INSERT INTO courses (code, name, description)
+        VALUES ($1, $2, $3)
+        RETURNING id, code, name, description
+    `;
 
-export const createCourse = async (courseData: Omit<Course, 'id'>): Promise<Course> => {
-    const sql = `INSERT INTO course (name, description) VALUES ($1, $2) RETURNING id`;
     const values = [
         courseData.name,
         courseData.description
@@ -29,19 +25,22 @@ export const createCourse = async (courseData: Omit<Course, 'id'>): Promise<Cour
 
     const result = await pool.query(sql, values);
 
-    return {
-        id: result.rows[0].id,
-        ...courseData
-    };
+    return result.rows[0];
 };
 
-
-export const modifyCourse = async (id: number, courseData: Omit<Course, 'id'>): Promise<Course | null> => {
+export const modifyCourse = async (
+    id: number,
+    courseData: Omit<Course, "id">
+): Promise<Course | null> => {
     const sql = `
-    UPDATE course 
-    SET name = $1, description = $2 
-    WHERE id = $3 
-    RETURNING id, name, description`;
+        UPDATE courses
+        SET code = $1,
+            name = $2,
+            description = $3
+        WHERE id = $4
+        RETURNING id, code, name, description
+    `;
+
     const values = [
         courseData.name,
         courseData.description,
@@ -50,10 +49,14 @@ export const modifyCourse = async (id: number, courseData: Omit<Course, 'id'>): 
 
     const result = await pool.query(sql, values);
 
-    return result.rows[0];
+    return result.rows[0] || null;
 };
 
 export const deleteCourse = async (id: number): Promise<boolean> => {
-    const result = await pool.query(`DELETE FROM course WHERE id = $1`, [id]);
+    const result = await pool.query(
+        "DELETE FROM courses WHERE id = $1",
+        [id]
+    );
+
     return (result.rowCount ?? 0) > 0;
 };

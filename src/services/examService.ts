@@ -1,7 +1,7 @@
 import type { Exam } from '../model/examModel.js';
 import { createExam, deleteExam, findAllExams, findExamById, modifyExam } from '../repository/examRepository.js';
 
-export const getAllExams = async (): Promise<Exam[]> =>  {
+export const getAllExams = async (): Promise<Exam[]> => {
   return await findAllExams();
 }
 

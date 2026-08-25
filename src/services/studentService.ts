@@ -1,7 +1,7 @@
 import type { User } from '../model/usersModel.js';
 import { createStudent, deleteStudent, findAllStudents, modifyStudent } from '../repository/studentRepository.js';
 
-export const getAllStudents = async (): Promise<User[]> =>  {
+export const getAllStudents = async (): Promise<User[]> => {
   return await findAllStudents();
 }
 

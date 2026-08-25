@@ -1,52 +1,88 @@
-import { Router, type Request, type Response} from 'express';
-import { findAllCourses, createNewCourse, updateCourse, removeCourse } from '../services/courseService.js';
+import type { Request, Response } from "express";
 
+import {
+  findAllCourses,
+  createCourse,
+  modifyCourse,
+  deleteCourse
+} from "../services/courseService.js";
 
+export const courseController = {
 
-const router = Router();
+  getAll: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const courses = await findAllCourses();
 
-router.get('/api/courses', async (req: Request, res: Response): Promise<void> => {
-  try {
-    const students = await findAllCourses();
-    res.json(students);
-  } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
-  }
-});
-
-router.post('/api/courses', async (req: Request, res: Response): Promise<void> => {
-  try {
-    const newCourse = await createNewCourse(req.body);
-    res.status(201).json(newCourse );
-  } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
-  }
-});
-
-router.put('/api/courses/:id', async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(req.params.id as string, 10);
-    const course = await updateCourse(id, req.body);
-    if (!course) {
-      return res.status(404).json({ message: 'Course not found' });
+      res.status(200).json(courses);
+    } catch (error: any) {
+      res.status(error.status || 500).json({
+        message: error.message || "Erreur serveur"
+      });
     }
-    res.json(course);
-  } catch (error) {
-    res.status(500).json({ message: 'Server Error'});
-  }
-});
+  },
 
-router.delete('/api/courses/:id', async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(req.params.id as string, 10);
-    const courseDeleted = await removeCourse(id);
-    if (!courseDeleted) {
-      return res.status(404).json({ message: 'Course not found' });
+  create: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { name, description } = req.body;
+
+      const course = await createCourse({
+        name,
+        description
+      });
+
+      res.status(201).json(course);
+    } catch (error: any) {
+      res.status(error.status || 500).json({
+        message: error.message || "Erreur serveur"
+      });
     }
-    res.status(200).json();
-  } catch (error) {
-    res.status(500).json({ message: 'Server Error'});
-  }
-});
+  },
 
-export default router;
+  update: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const id = Number(req.params.id);
+      const { name, description } = req.body;
+
+      const course = await modifyCourse(id, {
+        name,
+        description
+      });
+
+      if (!course) {
+        res.status(404).json({
+          message: "Cours introuvable"
+        });
+        return;
+      }
+
+      res.status(200).json(course);
+    } catch (error: any) {
+      res.status(error.status || 500).json({
+        message: error.message || "Erreur serveur"
+      });
+    }
+  },
+
+  delete: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const id = Number(req.params.id);
+
+      const deleted = await deleteCourse(id);
+
+      if (!deleted) {
+        res.status(404).json({
+          message: "Cours introuvable"
+        });
+        return;
+      }
+
+      res.status(200).json({
+        message: "Cours supprimé avec succès"
+      });
+    } catch (error: any) {
+      res.status(error.status || 500).json({
+        message: error.message || "Erreur serveur"
+      });
+    }
+  }
+};
