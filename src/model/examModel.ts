@@ -1,7 +1,8 @@
 export interface Exam {
     id : number;
     title : string;
-    startTime : Date;
-    endTime : Date;
+    startsAt : Date;
+    endsAt : Date;
     courseId : number;
+    createdAt?: Date;
 }

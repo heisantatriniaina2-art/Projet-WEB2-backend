@@ -1,4 +1,4 @@
-interface Attempts {
+interface Attempt {
     id : number;
     examId : number;
     studentId : number;
