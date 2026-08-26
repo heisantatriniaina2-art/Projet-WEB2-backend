@@ -15,12 +15,12 @@ router.get('/api/courses', authenticate, async (_req: Request, res: Response) =>
 
 router.post('/api/courses', authenticate, async (req: Request, res: Response) => {
   try {
-    const { name, description, created_at } = req.body;
-    if (!name || !description || !created_at) {
-      return res.status(400).json({ message: 'Invalid body: name, description, and created_at are required' });
+    const { name, description } = req.body;
+    if (!name || !description) {
+      return res.status(400).json({ message: 'Invalid body: name and description are required' });
     }
 
-    const newCourse = await createNewCourse({ name, description, created_at });
+    const newCourse = await createNewCourse({ name, description});
     res.status(201).json(newCourse);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -34,12 +34,12 @@ router.put('/api/courses/:id', authenticate, async (req: Request, res: Response)
       return res.status(400).json({ message: 'Invalid ID format' });
     }
 
-    const { name, description , created_at} = req.body;
-    if (!name || !description || !created_at) {
-      return res.status(400).json({ message: 'Invalid body: name, description, and created_at are required' });
+    const { name, description } = req.body;
+    if (!name || !description) {
+      return res.status(400).json({ message: 'Invalid body: name and description are required' });
     }
 
-    const course = await updateCourse(id, { name, description, created_at: new Date() });
+    const course = await updateCourse(id, { name, description });
     if (!course) {
       return res.status(404).json({ message: 'Course not found' });
     }

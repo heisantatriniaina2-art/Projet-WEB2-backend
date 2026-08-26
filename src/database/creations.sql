@@ -13,8 +13,7 @@ CREATE TABLE users(
 CREATE TABLE courses(
     id SERIAL primary key,
     name VARCHAR(50),
-    description TEXT,
-    created_at TIMESTAMPTZ 
+    description TEXT
 );
 
 CREATE TABLE exam(
