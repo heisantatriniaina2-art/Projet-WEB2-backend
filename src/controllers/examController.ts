@@ -4,12 +4,12 @@ import { authenticate } from '../security/authMiddleware.js';
 
 const router = Router();
 
-router.get('/api/exams', authenticate, async (req: Request, res: Response): Promise<void> => {
+router.get('/api/exams', authenticate, async (_req: Request, res: Response) => {
   try {
     const exams = await getAllExams();
-    res.json(exams);
+    return res.json(exams);
   } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
+    return res.status(500).json({ message: 'Server Error' });
   }
 });
 
@@ -25,27 +25,27 @@ router.get('/api/exams/:id', authenticate, async (req: Request, res: Response) =
       return res.status(404).json({ message: 'Exam not found' });
     }
     
-    res.json(exam);
+    return res.json(exam);
   } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
+    return res.status(500).json({ message: 'Server Error' });
   }
 });
 
 router.post('/api/exams', authenticate, async (req: Request, res: Response) => {
   try {
-    const { title, startTime, endTime, courseId } = req.body;
+    const { title, startsAt, endsAt, courseId } = req.body;
 
-    if (!title || !startTime || !endTime || !courseId) {
-      return res.status(400).json({ message: 'title, startTime, endTime and courseId are required' });
+    if (!title || !startsAt || !endsAt || !courseId) {
+      return res.status(400).json({ message: 'title, startsAt, endsAt and courseId are required' });
     }
 
-    const newExam = await createNewExam({ title, startTime, endTime, courseId });
-    res.status(201).json(newExam);
+    const newExam = await createNewExam({ title, startsAt, endsAt, courseId });
+    return res.status(201).json(newExam);
   } catch (error: any) {
     if (error.message === 'INVALID_DATES') {
-      return res.status(400).json({ message: 'startTime must be earlier than endTime' });
+      return res.status(400).json({ message: 'startsAt must be earlier than endsAt' });
     }
-    res.status(500).json({ message: 'Server Error' });
+    return res.status(500).json({ message: 'Server Error' });
   }
 });
 
@@ -56,25 +56,25 @@ router.put('/api/exams/:id', authenticate, async (req: Request, res: Response) =
       return res.status(400).json({ message: 'Invalid ID format' });
     }
 
-    const { title, startTime, endTime, courseId } = req.body;
-    if (!title || !startTime || !endTime || !courseId) {
-      return res.status(400).json({ message: 'title, startTime, endTime and courseId are required' });
+    const { title, startsAt, endsAt, courseId } = req.body;
+    if (!title || !startsAt || !endsAt || !courseId) {
+      return res.status(400).json({ message: 'title, startsAt, endsAt and courseId are required' });
     }
 
-    const updatedExam = await updateExam(id, { title, startTime, endTime, courseId });
+    const updatedExam = await updateExam(id, { title, startsAt, endsAt, courseId });
     if (!updatedExam) {
       return res.status(404).json({ message: 'Exam not found' });
     }
 
-    res.json(updatedExam);
+    return res.json(updatedExam);
   } catch (error: any) {
     if (error.message === 'INVALID_DATES') {
-      return res.status(400).json({ message: 'startTime must be earlier than endTime' });
+      return res.status(400).json({ message: 'startsAt must be earlier than endsAt' });
     }
     if (error.message === 'HAS_ATTEMPTS_CANNOT_MODIFY') {
       return res.status(409).json({ message: 'Conflict: Cannot modify an exam that already has attempts' });
     }
-    res.status(500).json({ message: 'Server Error' });
+    return res.status(500).json({ message: 'Server Error' });
   }
 });
 
@@ -86,7 +86,7 @@ router.delete('/api/exams/:id', authenticate, async (req: Request, res: Response
     }
 
     await removeExam(id);
-    res.status(200).json({ message: 'Exam deleted successfully' });
+    return res.status(200).json({ message: 'Exam deleted successfully' });
   } catch (error: any) {
     if (error.message === 'NOT_FOUND') {
       return res.status(404).json({ message: 'Exam not found' });
@@ -94,7 +94,7 @@ router.delete('/api/exams/:id', authenticate, async (req: Request, res: Response
     if (error.message === 'HAS_ATTEMPTS_CANNOT_DELETE') {
       return res.status(409).json({ message: 'Conflict: Cannot delete an exam that already has attempts' });
     }
-    res.status(500).json({ message: 'Server Error' });
+    return res.status(500).json({ message: 'Server Error' });
   }
 });
 

@@ -1,16 +1,16 @@
 import type { Course } from '../model/courseModel.js';
-import { createCourse, deleteCourse, findAllCourses, modifyCourse, countExamsByCourseId } from '../repository/courseRepository.js';
+import { createNewCourse, deleteCourse, findAllCourses, updateCourse, countExamsByCourseId } from '../repository/courseRepository.js';
 
 export const getAllCourses = async (): Promise<Course[]> => {
   return await findAllCourses();
 };
 
-export const createNewCourse = async (courseData: Omit<Course, 'id'>): Promise<Course> => {
-  return await createCourse(courseData);
+export const createCourse = async (courseData: Omit<Course, 'id'>): Promise<Course> => {
+  return await createNewCourse(courseData);
 };
 
-export const updateCourse = async (id: number, courseData: Omit<Course, 'id'>): Promise<Course | null> => {
-  return await modifyCourse(id, courseData);
+export const modifyCourse = async (id: number, courseData: Omit<Course, 'id'>): Promise<Course | null> => {
+  return await updateCourse(id, courseData);
 };
 
 export const removeCourse = async (id: number): Promise<boolean> => {

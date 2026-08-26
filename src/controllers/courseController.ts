@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import { createNewCourse, getAllCourses, removeCourse, updateCourse } from '../services/courseService.js';
+import { createCourse, getAllCourses, removeCourse, modifyCourse } from '../services/courseService.js';
 import { authenticate } from '../security/authMiddleware.js';
 
 const router = Router();
@@ -15,12 +15,12 @@ router.get('/api/courses', authenticate, async (_req: Request, res: Response) =>
 
 router.post('/api/courses', authenticate, async (req: Request, res: Response) => {
   try {
-    const { name, description } = req.body;
-    if (!name || !description) {
-      return res.status(400).json({ message: 'Invalid body: name and description are required' });
+    const { code, name, description } = req.body;
+    if (!code || !name || !description) {
+      return res.status(400).json({ message: 'Invalid body: code, name, and description are required' });
     }
 
-    const newCourse = await createNewCourse({ name, description});
+    const newCourse = await createCourse({ code, name, description });
     res.status(201).json(newCourse);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -34,12 +34,12 @@ router.put('/api/courses/:id', authenticate, async (req: Request, res: Response)
       return res.status(400).json({ message: 'Invalid ID format' });
     }
 
-    const { name, description } = req.body;
-    if (!name || !description) {
-      return res.status(400).json({ message: 'Invalid body: name and description are required' });
+    const { code, name, description, createdAt } = req.body;
+    if (!code || !name || !description) {
+      return res.status(400).json({ message: 'Invalid body: code, name, and description are required' });
     }
 
-    const course = await updateCourse(id, { name, description });
+    const course = await modifyCourse(id, { code, name, description, createdAt });
     if (!course) {
       return res.status(404).json({ message: 'Course not found' });
     }
