@@ -57,19 +57,17 @@ export const createStudent = async (studentData: Omit<User, 'id'>): Promise<User
 };
 
 export const modifyStudent = async (id: number, studentData: Omit<User, 'id'>): Promise<User | null> => {
-  const hashedPassword = await bcrypt.hash(studentData.password, 10);
-
   const sql = `
     UPDATE users 
     SET first_name = $1, last_name = $2, email = $3, password = $4 
     WHERE id = $5 AND role = 'student'
-    RETURNING id, first_name, last_name, email, role, is_active`;
+    RETURNING id, first_name, last_name, email, password, role, is_active`;
 
   const values = [
     studentData.firstName,
     studentData.lastName,
     studentData.email,
-    hashedPassword,
+    studentData.password,
     id
   ];
 
@@ -82,7 +80,7 @@ export const modifyStudent = async (id: number, studentData: Omit<User, 'id'>): 
     firstName: row.first_name,
     lastName: row.last_name,
     email: row.email,
-    password: '',
+    password: row.password,
     role: row.role,
     isActive: row.is_active
   };
