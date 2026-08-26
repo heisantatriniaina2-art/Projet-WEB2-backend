@@ -10,65 +10,97 @@ const pool = new pg.Pool({
 });
 
 export const findAllExams = async (): Promise<Exam[]> => {
-    const result = await pool.query('SELECT id, title, start_time, end_time, course_id FROM exam');
-    
-    return result.rows.map(row => ({
-        id: row.id,
-        title: row.title,
-        startTime: row.start_time,
-        endTime: row.end_time,
-        courseId: row.course_id
-    }));
+  const result = await pool.query('SELECT id, title, start_time, end_time, course_id FROM exam');
+  
+  return result.rows.map(row => ({
+    id: row.id,
+    title: row.title,
+    startTime: row.start_time,
+    endTime: row.end_time,
+    courseId: row.course_id
+  }));
 };
 
 export const findExamById = async (id: number): Promise<Exam | null> => {
-    const result = await pool.query('SELECT * FROM exam WHERE id = $1', [id]);
+  const result = await pool.query(
+    'SELECT id, title, start_time, end_time, course_id FROM exam WHERE id = $1', 
+    [id]
+  );
 
-    const row = result.rows[0];
-    return {
-        id: row.id,
-        title: row.title,
-        startTime: row.start_time,
-        endTime: row.end_time,
-        courseId: row.course_id
-    };
-}
+  if (result.rows.length === 0) return null;
+
+  const row = result.rows[0];
+  return {
+    id: row.id,
+    title: row.title,
+    startTime: row.start_time,
+    endTime: row.end_time,
+    courseId: row.course_id
+  };
+};
 
 export const createExam = async (examData: Omit<Exam, 'id'>): Promise<Exam> => {
-    const sql = `INSERT INTO exam (title, start_time, end_time) VALUES ($1, $2, $3) RETURNING id`;
-    const values = [
-        examData.title,
-        examData.startTime,
-        examData.endTime
-    ];
+  const sql = `
+    INSERT INTO exam (title, start_time, end_time, course_id) 
+    VALUES ($1, $2, $3, $4) 
+    RETURNING id, title, start_time, end_time, course_id`;
+  
+  const values = [
+    examData.title,
+    examData.startTime,
+    examData.endTime,
+    examData.courseId
+  ];
 
-    const result = await pool.query(sql, values);
+  const result = await pool.query(sql, values);
+  const row = result.rows[0];
 
-    return {
-        id: result.rows[0].id,
-        ...examData
-    };
+  return {
+    id: row.id,
+    title: row.title,
+    startTime: row.start_time,
+    endTime: row.end_time,
+    courseId: row.course_id
+  };
 };
 
 export const modifyExam = async (id: number, examData: Omit<Exam, 'id'>): Promise<Exam | null> => {
-    const sql = `
+  const sql = `
     UPDATE exam 
-    SET title = $1, start_time = $2, end_time = $3 
-    WHERE id = $4 
-    RETURNING id, title, start_time, end_time`;
-    const values = [
-        examData.title,
-        examData.startTime,
-        examData.endTime,
-        id
-    ];
+    SET title = $1, start_time = $2, end_time = $3, course_id = $4
+    WHERE id = $5 
+    RETURNING id, title, start_time, end_time, course_id`;
 
-    const result = await pool.query(sql, values);
+  const values = [
+    examData.title,
+    examData.startTime,
+    examData.endTime,
+    examData.courseId,
+    id
+  ];
 
-    return result.rows[0];
-}
+  const result = await pool.query(sql, values);
+  if (result.rows.length === 0) return null;
+
+  const row = result.rows[0];
+  return {
+    id: row.id,
+    title: row.title,
+    startTime: row.start_time,
+    endTime: row.end_time,
+    courseId: row.course_id
+  };
+};
+
+export const countExamAttempts = async (examId: number): Promise<number> => {
+  const result = await pool.query(
+    'SELECT COUNT(*) FROM attempts WHERE exam_id = $1', 
+    [examId]
+  );
+  return parseInt(result.rows[0].count, 10);
+};
 
 export const deleteExam = async (id: number): Promise<boolean> => {
-    const result = await pool.query(`DELETE FROM exam WHERE id = $1`, [id]);
-    return (result.rowCount ?? 0) > 0;
-}
+  const result = await pool.query('DELETE FROM exam WHERE id = $1', [id]);
+  return (result.rowCount ?? 0) > 0;
+};

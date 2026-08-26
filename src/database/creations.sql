@@ -20,7 +20,9 @@ CREATE TABLE exam(
     id SERIAL primary key,
     title VARCHAR(50),
     start_time TIMESTAMPTZ,
-    end_time TIMESTAMPTZ
+    end_time TIMESTAMPTZ,
+    course_id INT NOT NULL,
+    CONSTRAINT fk_course_exam FOREIGN KEY (course_id) REFERENCES courses(id)
 );
 
 CREATE TABLE questions(

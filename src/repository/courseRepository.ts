@@ -10,50 +10,64 @@ const pool = new pg.Pool({
 });
 
 export const findAllCourses = async (): Promise<Course[]> => {
-const result = await pool.query('SELECT id, name, description FROM course');
+  const result = await pool.query('SELECT id, name, description FROM courses');
 
-    return result.rows.map(row => ({
-        id: row.id,
-        name: row.name,
-        description: row.description
-    }));
+  return result.rows.map(row => ({
+    id: row.id,
+    name: row.name,
+    description: row.description
+  }));
 };
 
+export const findCourseById = async (id: number): Promise<Course | null> => {
+  const result = await pool.query('SELECT id, name, description FROM courses WHERE id = $1', [id]);
+  if (result.rows.length === 0) return null;
+
+  return {
+    id: result.rows[0].id,
+    name: result.rows[0].name,
+    description: result.rows[0].description
+  };
+};
 
 export const createCourse = async (courseData: Omit<Course, 'id'>): Promise<Course> => {
-    const sql = `INSERT INTO course (name, description) VALUES ($1, $2) RETURNING id`;
-    const values = [
-        courseData.name,
-        courseData.description
-    ];
+  const sql = `INSERT INTO courses (name, description) VALUES ($1, $2) RETURNING id, name, description`;
+  const values = [courseData.name, courseData.description];
 
-    const result = await pool.query(sql, values);
+  const result = await pool.query(sql, values);
+  const row = result.rows[0];
 
-    return {
-        id: result.rows[0].id,
-        ...courseData
-    };
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description
+  };
 };
 
-
 export const modifyCourse = async (id: number, courseData: Omit<Course, 'id'>): Promise<Course | null> => {
-    const sql = `
-    UPDATE course 
+  const sql = `
+    UPDATE courses 
     SET name = $1, description = $2 
     WHERE id = $3 
     RETURNING id, name, description`;
-    const values = [
-        courseData.name,
-        courseData.description,
-        id
-    ];
+  const values = [courseData.name, courseData.description, id];
 
-    const result = await pool.query(sql, values);
+  const result = await pool.query(sql, values);
+  if (result.rows.length === 0) return null;
 
-    return result.rows[0];
+  return {
+    id: result.rows[0].id,
+    name: result.rows[0].name,
+    description: result.rows[0].description
+  };
+};
+
+export const countExamsByCourseId = async (courseId: number): Promise<number> => {
+  const result = await pool.query('SELECT COUNT(*) FROM exam WHERE course_id = $1', [courseId]);
+  return parseInt(result.rows[0].count, 10);
 };
 
 export const deleteCourse = async (id: number): Promise<boolean> => {
-    const result = await pool.query(`DELETE FROM course WHERE id = $1`, [id]);
-    return (result.rowCount ?? 0) > 0;
+  const result = await pool.query('DELETE FROM courses WHERE id = $1', [id]);
+  return (result.rowCount ?? 0) > 0;
 };
