@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import { getAllCourses, getCourseById, createNewCourse, updateCourse, removeCourse } from '../services/courseService.js';
+import { getAllCourses, createNewCourse, updateCourse, removeCourse } from '../services/courseService.js';
 import { authenticate } from '../security/authMiddleware.js';
 
 const router = Router();
@@ -8,24 +8,6 @@ router.get('/api/courses', authenticate, async (_req: Request, res: Response): P
   try {
     const courses = await getAllCourses();
     res.json(courses);
-  } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
-  }
-});
-
-router.get('/api/courses/:id', authenticate, async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(req.params.id as string, 10);
-    if (isNaN(id)) {
-      return res.status(400).json({ message: 'Invalid ID format' });
-    }
-
-    const course = await getCourseById(id);
-    if (!course) {
-      return res.status(404).json({ message: 'Course not found' });
-    }
-
-    res.json(course);
   } catch (error) {
     res.status(500).json({ message: 'Server Error' });
   }

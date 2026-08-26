@@ -19,17 +19,6 @@ export const findAllCourses = async (): Promise<Course[]> => {
   }));
 };
 
-export const findCourseById = async (id: number): Promise<Course | null> => {
-  const result = await pool.query('SELECT id, name, description FROM courses WHERE id = $1', [id]);
-  if (result.rows.length === 0) return null;
-
-  return {
-    id: result.rows[0].id,
-    name: result.rows[0].name,
-    description: result.rows[0].description
-  };
-};
-
 export const createCourse = async (courseData: Omit<Course, 'id'>): Promise<Course> => {
   const sql = `INSERT INTO courses (name, description) VALUES ($1, $2) RETURNING id, name, description`;
   const values = [courseData.name, courseData.description];

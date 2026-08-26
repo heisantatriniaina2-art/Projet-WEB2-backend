@@ -27,26 +27,6 @@ export const findAllStudents = async (): Promise<User[]> => {
   }));
 };
 
-export const findStudentById = async (id: number): Promise<User | null> => {
-  const result = await pool.query(
-    'SELECT id, first_name, last_name, email, password, role, is_active FROM users WHERE id = $1 AND role = $2',
-    [id, 'student']
-  );
-
-  if (result.rows.length === 0) return null;
-
-  const row = result.rows[0];
-  return {
-    id: row.id,
-    firstName: row.first_name,
-    lastName: row.last_name,
-    email: row.email,
-    password: row.password,
-    role: row.role,
-    isActive: row.is_active
-  };
-};
-
 export const createStudent = async (studentData: Omit<User, 'id'>): Promise<User> => {
   const hashedPassword = await bcrypt.hash(studentData.password, 10);
 
