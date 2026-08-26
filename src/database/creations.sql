@@ -27,6 +27,7 @@ CREATE TABLE exam(
 
 CREATE TABLE questions(
     id SERIAL primary key,
+    points INT NOT NULL,
     exam_id INT NOT NULL,
     CONSTRAINT fk_exam_questions FOREIGN KEY (exam_id) REFERENCES exam(id),
     points INT NOT NULL
