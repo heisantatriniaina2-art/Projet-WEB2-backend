@@ -1,5 +1,5 @@
-import type { User } from "../model/usersModel";
-import { pool } from "../db";
+import type { User } from "../models/usersModel";
+import { pool } from "../configuration/database";
 export const authRepository = {
     findUserByEmail: async (email: string): Promise<User | null> => {
         const sql = `

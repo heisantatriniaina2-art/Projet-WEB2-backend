@@ -1,57 +1,50 @@
 import bcrypt from "bcrypt";
-import { authRepository } from "../repository/authRepository.js";
-import { generateToken } from "../security/jwt";
 
-export const authService = {
+import { findUserByEmail } from "../repositories/userRepository.js";
+import { generateToken } from "../security/jwt.js";
 
-    login: async (email: string, password: string) => {
+export async function loginUser(
+    email: string,
+    password: string
+) {
+    // Rechercher l'utilisateur
+    const user = await findUserByEmail(email);
 
-        const user = await authRepository.findUserByEmail(email);
-
-        if (!user) {
-            const error: any = new Error(
-                "Email ou mot de passe incorrect"
-            );
-            error.status = 401;
-            throw error;
-        }
-
-        if (!user.isActive) {
-            const error: any = new Error(
-                "Ce compte est désactivé"
-            );
-            error.status = 403;
-            throw error;
-        }
-
-        const isMatch = await bcrypt.compare(
-            password,
-            user.password
-        );
-
-        if (!isMatch) {
-            const error: any = new Error(
-                "Email ou mot de passe incorrect"
-            );
-            error.status = 401;
-            throw error;
-        }
-
-        const token = generateToken({
-            id: user.id,
-            role: user.role
-        });
-
-        return {
-            message: "Connexion réussie",
-            token,
-            user: {
-                id: user.id,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                role: user.role
-            }
-        };
+    if (!user) {
+        throw new Error("Email ou mot de passe incorrect");
     }
-};
+
+    // Vérifier si le compte est actif
+    if (!user.is_active) {
+        throw new Error("Compte désactivé");
+    }
+
+    // Vérifier le mot de passe
+    const passwordValid = await bcrypt.compare(
+        password,
+        user.password_hash
+    );
+
+    if (!passwordValid) {
+        throw new Error("Email ou mot de passe incorrect");
+    }
+
+    // Créer le JWT
+    const token = generateToken({
+        id: user.id,
+        email: user.email,
+        role: user.role
+    });
+
+    // Ne jamais retourner password_hash au frontend
+    return {
+        token,
+        user: {
+            id: user.id,
+            name: `${user.first_name} ${user.last_name}`.trim(),
+            email: user.email,
+            role: user.role,
+            isActive: user.is_active
+        }
+    };
+}

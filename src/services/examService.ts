@@ -1,22 +1,63 @@
-import type { Exam } from '../model/examModel.js';
-import { createExam, deleteExam, findAllExams, findExamById, modifyExam } from '../repository/examRepository.js';
+import {
+  findAllExams,
+  findExamById,
+  createExam,
+  updateExam,
+  deleteExam
+} from "../repositories/examRepository.js";
 
-export const getAllExams = async (): Promise<Exam[]> => {
-  return await findAllExams();
+
+// Récupérer tous les examens
+export async function getExams() {
+  return findAllExams();
 }
 
-export const getExamById = async (id: number): Promise<Exam | null> => {
-  return await findExamById(id);
+
+// Récupérer un examen
+export async function getExam(id: number) {
+  return findExamById(id);
 }
 
-export const createNewExam = async (examData: Omit<Exam, 'id'>): Promise<Exam> => {
-  return await createExam(examData);
+
+// Créer un examen
+export async function addExam(
+  courseId: number,
+  title: string,
+  description: string | null,
+  startAt: string,
+  endAt: string
+) {
+  return createExam(
+    courseId,
+    title,
+    description,
+    startAt,
+    endAt
+  );
 }
 
-export const updateExam = async (id: number, examData: Omit<Exam, 'id'>): Promise<Exam | null> => {
-  return await modifyExam(id, examData);
+
+// Modifier un examen
+export async function editExam(
+  id: number,
+  courseId: number,
+  title: string,
+  description: string | null,
+  startAt: string,
+  endAt: string
+) {
+  return updateExam(
+    id,
+    courseId,
+    title,
+    description,
+    startAt,
+    endAt
+  );
 }
 
-export const removeExam = async (id: number): Promise<boolean> => {
-  return await deleteExam(id);
+
+// Supprimer un examen
+export async function removeExam(id: number) {
+  return deleteExam(id);
 }

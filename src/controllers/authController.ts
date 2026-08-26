@@ -1,9 +1,12 @@
 import type { Request, Response } from "express";
-import { authService } from "../services/authService.js";
+import { loginUser } from "../services/authService.js";
 
 export const authController = {
 
-  login: async (req: Request, res: Response): Promise<void> => {
+  login: async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
 
     try {
 
@@ -16,14 +19,21 @@ export const authController = {
         return;
       }
 
-      const result = await authService.login(email, password);
+      const result = await loginUser(
+        email,
+        password
+      );
 
       res.status(200).json(result);
 
     } catch (error: any) {
 
-      const status = error.status || 500;
-      const message = error.message || "Erreur serveur";
+      console.error("Erreur de connexion :", error);
+
+      const status = error.status || 401;
+      const message =
+        error.message ||
+        "Email ou mot de passe incorrect";
 
       res.status(status).json({
         message

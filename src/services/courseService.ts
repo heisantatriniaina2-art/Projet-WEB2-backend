@@ -1,66 +1,41 @@
-import type { Course } from "../model/courseModel.js";
-import { pool } from "../db.js";
+import {
+  findAllCourses,
+  findCourseById,
+  createCourse,
+  updateCourse,
+  deleteCourse
+} from "../repositories/courseRepository.js";
 
-export const findAllCourses = async (): Promise<Course[]> => {
-  const result = await pool.query(
-    "SELECT id, name, description, created_at FROM courses ORDER BY id"
-  );
+export async function getCourses() {
+  return findAllCourses();
+}
 
-  return result.rows;
-};
+export async function getCourse(id: number) {
+  return findCourseById(id);
+}
 
-export const createCourse = async (
-  courseData: Omit<Course, "id" | "created_at">
-): Promise<Course> => {
+export async function addCourse(
+  code: string,
+  name: string,
+  description: string | null
+) {
+  return createCourse(code, name, description);
+}
 
-  const sql = `
-        INSERT INTO courses (name, description)
-        VALUES ($1, $2)
-        RETURNING id, name, description, created_at
-    `;
-
-  const values = [
-    courseData.name,
-    courseData.description
-  ];
-
-  const result = await pool.query(sql, values);
-
-  return result.rows[0];
-};
-
-export const modifyCourse = async (
+export async function editCourse(
   id: number,
-  courseData: Omit<Course, "id" | "created_at">
-): Promise<Course | null> => {
-
-  const sql = `
-        UPDATE courses
-        SET name = $1,
-            description = $2
-        WHERE id = $3
-        RETURNING id, name, description, created_at
-    `;
-
-  const values = [
-    courseData.name,
-    courseData.description,
-    id
-  ];
-
-  const result = await pool.query(sql, values);
-
-  return result.rows[0] || null;
-};
-
-export const deleteCourse = async (
-  id: number
-): Promise<boolean> => {
-
-  const result = await pool.query(
-    "DELETE FROM courses WHERE id = $1",
-    [id]
+  code: string,
+  name: string,
+  description: string | null
+) {
+  return updateCourse(
+    id,
+    code,
+    name,
+    description
   );
+}
 
-  return (result.rowCount ?? 0) > 0;
-};
+export async function removeCourse(id: number) {
+  return deleteCourse(id);
+}

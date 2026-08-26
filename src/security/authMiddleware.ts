@@ -1,74 +1,51 @@
-import type { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import type {
+  Request,
+  Response,
+  NextFunction
+} from "express";
 
-export interface AuthRequest extends Request {
-  user?: {
-    id: number;
-    role: "admin" | "student";
-  };
-}
-
-const JWT_SECRET = process.env.JWT_SECRET;
+import { verifyToken } from "./jwt.js";
 
 export const authenticate = (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction
-) => {
+): void => {
 
-  if (!JWT_SECRET) {
-    return res.status(500).json({
-      message: "JWT_SECRET non configuré"
-    });
-  }
+  const authorization =
+    req.headers.authorization;
 
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader) {
-    return res.status(401).json({
+  if (!authorization) {
+    res.status(401).json({
       message: "Token manquant"
     });
+    return;
   }
 
-  if (!authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({
+  const [type, token] =
+    authorization.split(" ");
+
+  if (type !== "Bearer" || !token) {
+    res.status(401).json({
       message: "Format du token invalide"
     });
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({
-      message: "Token manquant"
-    });
+    return;
   }
 
   try {
 
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const payload = verifyToken(token);
 
-    if (
-      typeof decoded !== "object" ||
-      decoded === null ||
-      typeof decoded.id !== "number" ||
-      (decoded.role !== "admin" && decoded.role !== "student")
-    ) {
-      return res.status(401).json({
-        message: "Token invalide"
-      });
-    }
-
-    req.user = {
-      id: decoded.id,
-      role: decoded.role
+    (req as any).user = {
+      id: payload.id,
+      role: payload.role
     };
 
     next();
 
   } catch (error) {
 
-    return res.status(401).json({
+    res.status(401).json({
       message: "Token invalide ou expiré"
     });
   }
