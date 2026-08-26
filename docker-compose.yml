@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: exam-hub-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: examhub
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 42689
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

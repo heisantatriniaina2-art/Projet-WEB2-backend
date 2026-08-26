@@ -12,7 +12,7 @@ const pool = new pg.Pool({
 export const findAllExams = async (): Promise<Exam[]> => {
   const result = await pool.query('SELECT id, title, start_time, end_time, course_id FROM exam');
   
-  return result.rows.map(row => ({
+  return result.rows.map((row) => ({
     id: row.id,
     title: row.title,
     startTime: row.start_time,

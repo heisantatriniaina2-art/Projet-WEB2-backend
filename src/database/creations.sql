@@ -13,7 +13,8 @@ CREATE TABLE users(
 CREATE TABLE courses(
     id SERIAL primary key,
     name VARCHAR(50),
-    description VARCHAR(255)
+    description TEXT,
+    created_at TIMESTAMPTZ 
 );
 
 CREATE TABLE exam(
@@ -51,10 +52,10 @@ CREATE TABLE attempts(
 
 CREATE TABLE answers(
     id SERIAL primary key,
-    attemp_id INT NOT NULL,
+    attempt_id INT NOT NULL,
     question_id INT NOT NULL,
     choice_id INT NOT NULL,
-    CONSTRAINT fk_attempts_answers FOREIGN KEY(attemp_id) REFERENCES attempts(id),
+    CONSTRAINT fk_attempts_answers FOREIGN KEY(attempt_id) REFERENCES attempts(id),
     CONSTRAINT fk_questions_answers FOREIGN KEY(question_id) REFERENCES questions(id),
     CONSTRAINT fk_choice_answers FOREIGN KEY(choice_id) REFERENCES choices(id)
 );

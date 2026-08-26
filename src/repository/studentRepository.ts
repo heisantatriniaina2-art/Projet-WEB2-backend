@@ -50,7 +50,7 @@ export const createStudent = async (studentData: Omit<User, 'id'>): Promise<User
     firstName: row.first_name,
     lastName: row.last_name,
     email: row.email,
-    password: '',
+    password: row.password,
     role: row.role,
     isActive: row.is_active
   };

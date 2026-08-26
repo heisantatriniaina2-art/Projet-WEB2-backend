@@ -10,18 +10,33 @@ const pool = new pg.Pool({
 });
 
 export const findAllCourses = async (): Promise<Course[]> => {
-  const result = await pool.query('SELECT id, name, description FROM courses');
+  const result = await pool.query(
+    'SELECT id, name, description, created_at FROM courses'
+  );
 
-  return result.rows.map(row => ({
+  return result.rows.map((row ) => ({
     id: row.id,
     name: row.name,
-    description: row.description
+    description: row.description,
+    created_at: row.created_at
   }));
 };
 
+export const findCourseById = async (id: number): Promise<Course | null> => {
+  const result = await pool.query('SELECT id, name, description, created_at  FROM courses WHERE id = $1', [id]);
+  if (result.rows.length === 0) return null;
+
+  return {
+    id: result.rows[0].id,
+    name: result.rows[0].name,
+    description: result.rows[0].description,
+    created_at: result.rows[0].created_at
+  };
+};
+
 export const createCourse = async (courseData: Omit<Course, 'id'>): Promise<Course> => {
-  const sql = `INSERT INTO courses (name, description) VALUES ($1, $2) RETURNING id, name, description`;
-  const values = [courseData.name, courseData.description];
+  const sql = `INSERT INTO courses (name, description, created_at) VALUES ($1, $2, $3) RETURNING id, name, description, created_at`;
+  const values = [courseData.name, courseData.description, courseData.created_at];
 
   const result = await pool.query(sql, values);
   const row = result.rows[0];
@@ -29,7 +44,8 @@ export const createCourse = async (courseData: Omit<Course, 'id'>): Promise<Cour
   return {
     id: row.id,
     name: row.name,
-    description: row.description
+    description: row.description,
+    created_at: row.created_at  
   };
 };
 
@@ -38,7 +54,7 @@ export const modifyCourse = async (id: number, courseData: Omit<Course, 'id'>): 
     UPDATE courses 
     SET name = $1, description = $2 
     WHERE id = $3 
-    RETURNING id, name, description`;
+    RETURNING id, name, description, created_at`;
   const values = [courseData.name, courseData.description, id];
 
   const result = await pool.query(sql, values);
@@ -47,7 +63,8 @@ export const modifyCourse = async (id: number, courseData: Omit<Course, 'id'>): 
   return {
     id: result.rows[0].id,
     name: result.rows[0].name,
-    description: result.rows[0].description
+    description: result.rows[0].description,
+    created_at: result.rows[0].created_at
   };
 };
 

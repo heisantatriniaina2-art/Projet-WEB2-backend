@@ -1,9 +1,13 @@
 import 'dotenv/config';
 import express from 'express';
+import cors from 'cors';
 import { authController } from './controllers/authController.js';
 
+
 const app = express();
+app.use(cors());
 app.use(express.json());
+
 
 app.post('/api/auth/login', authController.login);
 
