@@ -17,8 +17,8 @@ router.post('/api/auth/login', async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     if (error.message === 'ACCOUNT_DEACTIVATED') {
-        return res.status(403).json({ message: 'Your account has been desactivated' });
-      }
+      return res.status(403).json({ message: 'Your account has been desactivated' });
+    }
     return res.status(500).json({ message: 'Server Error' });
   }
 });
