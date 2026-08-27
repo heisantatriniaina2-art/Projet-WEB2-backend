@@ -1,57 +1,38 @@
-import bcrypt from "bcrypt";
-import { authRepository } from "../repository/authRepository.js";
-import { generateToken } from "../security/jwt";
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { findUserByEmail } from '../repository/authRepository.js';
 
-export const authService = {
+const JWT_SECRET = process.env.JWT_SECRET || 'secret_key_changez_moi';
 
-    login: async (email: string, password: string) => {
+export const loginUser = async (email: string, passwordPlain: string) => {
+  const user = await findUserByEmail(email);
+  if (!user) {
+    throw new Error('INVALID_CREDENTIALS');
+  }
 
-        const user = await authRepository.findUserByEmail(email);
+  const isPasswordValid = await bcrypt.compare(passwordPlain, user.passwordHash);
+  if (!isPasswordValid) {
+    throw new Error('INVALID_CREDENTIALS');
+  }
 
-        if (!user) {
-            const error: any = new Error(
-                "Email ou mot de passe incorrect"
-            );
-            error.status = 401;
-            throw error;
-        }
+  if (!user.isActive) {
+    throw new Error('ACCOUNT_DEACTIVATED');
+  }
 
-        if (!user.isActive) {
-            const error: any = new Error(
-                "Ce compte est désactivé"
-            );
-            error.status = 403;
-            throw error;
-        }
+  const token = jwt.sign(
+    { id: user.id, email: user.email, role: user.role, isActive: user.isActive },
+    JWT_SECRET,
+    { expiresIn: '8h' }
+  );
 
-        const isMatch = await bcrypt.compare(
-            password,
-            user.password
-        );
-
-        if (!isMatch) {
-            const error: any = new Error(
-                "Email ou mot de passe incorrect"
-            );
-            error.status = 401;
-            throw error;
-        }
-
-        const token = generateToken({
-            id: user.id,
-            role: user.role
-        });
-
-        return {
-            message: "Connexion réussie",
-            token,
-            user: {
-                id: user.id,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                role: user.role
-            }
-        };
+  return {
+    token,
+    user: {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role
     }
+  };
 };

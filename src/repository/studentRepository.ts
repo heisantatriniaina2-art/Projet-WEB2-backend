@@ -10,9 +10,9 @@ const pool = new pg.Pool({
   database: process.env.DB_NAME || 'gestion_examens'
 });
 
-export const findAllStudents = async (): Promise<User[]> => {
+export const findAllStudents = async (): Promise<Omit<User, 'passwordHash'>[]> => {
   const result = await pool.query(
-    'SELECT id, first_name, last_name, email, password, role, is_active FROM users WHERE role = $1',
+    'SELECT id, first_name, last_name, email, role, is_active FROM users WHERE role = $1',
     ['student']
   );
 
@@ -21,19 +21,19 @@ export const findAllStudents = async (): Promise<User[]> => {
     firstName: row.first_name,
     lastName: row.last_name,
     email: row.email,
-    password: row.password,
     role: row.role,
-    isActive: row.is_active
+    isActive: row.is_active,
+    createdAt: row.created_at
   }));
 };
 
-export const createStudent = async (studentData: Omit<User, 'id'>): Promise<User> => {
-  const hashedPassword = await bcrypt.hash(studentData.password, 10);
+export const createStudent = async (studentData: Omit<User, 'id' | 'createdAt' | 'passwordHash'> & { passwordHash: string }): Promise<Omit<User, 'passwordHash'>> => {
+  const hashedPassword = await bcrypt.hash(studentData.passwordHash, 10);
 
   const sql = `
-    INSERT INTO users (first_name, last_name, email, password, role) 
-    VALUES ($1, $2, $3, $4, 'student') 
-    RETURNING id, first_name, last_name, email, role, is_active`;
+    INSERT INTO users (first_name, last_name, email, password_hash, role, is_active) 
+    VALUES ($1, $2, $3, $4, 'student', true) 
+    RETURNING id, first_name, last_name, email, role, is_active, created_at`;
 
   const values = [
     studentData.firstName,
@@ -50,24 +50,26 @@ export const createStudent = async (studentData: Omit<User, 'id'>): Promise<User
     firstName: row.first_name,
     lastName: row.last_name,
     email: row.email,
-    password: row.password,
     role: row.role,
-    isActive: row.is_active
+    isActive: row.is_active,
+    createdAt: row.created_at
   };
 };
 
-export const modifyStudent = async (id: number, studentData: Omit<User, 'id'>): Promise<User | null> => {
+export const updateStudent = async (id: number, studentData: Omit<User, 'id' | 'createdAt' | 'passwordHash'> & { passwordHash: string }): Promise<Omit<User, 'passwordHash'> | null> => {
+  const hashedPassword = await bcrypt.hash(studentData.passwordHash, 10);       
+
   const sql = `
     UPDATE users 
-    SET first_name = $1, last_name = $2, email = $3, password = $4 
+    SET first_name = $1, last_name = $2, email = $3, password_hash = $4 
     WHERE id = $5 AND role = 'student'
-    RETURNING id, first_name, last_name, email, password, role, is_active`;
+    RETURNING id, first_name, last_name, email, password_hash, role, is_active`;
 
   const values = [
     studentData.firstName,
     studentData.lastName,
     studentData.email,
-    studentData.password,
+    hashedPassword,
     id
   ];
 
@@ -80,13 +82,13 @@ export const modifyStudent = async (id: number, studentData: Omit<User, 'id'>): 
     firstName: row.first_name,
     lastName: row.last_name,
     email: row.email,
-    password: row.password,
     role: row.role,
-    isActive: row.is_active
+    isActive: row.is_active,
+    createdAt: row.created_at
   };
 };
 
-export const deleteStudent = async (id: number): Promise<boolean> => {
+export const desactiveStudent = async (id: number): Promise<boolean> => {
   const sql = `UPDATE users SET is_active = false WHERE id = $1 AND role = 'student'`;
   const result = await pool.query(sql, [id]);
   return (result.rowCount ?? 0) > 0;

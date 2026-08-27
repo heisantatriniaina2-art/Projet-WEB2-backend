@@ -1,5 +1,7 @@
 import { Router, type Request, type Response } from 'express';
-import { createNewExam, getAllExams, getExamById, removeExam, updateExam } from '../services/examService.js';
+import { createNewExam, getAllExams, getExamById, removeExam, updateExam, 
+  getAvailableExamsService, getAvailableExamByIdService, submitExamAttemptService, getStudentResultsService
+ } from '../services/examService.js';
 import { authenticate } from '../security/authMiddleware.js';
 
 const router = Router();
@@ -95,6 +97,63 @@ router.delete('/api/exams/:id', authenticate, async (req: Request, res: Response
       return res.status(409).json({ message: 'Conflict: Cannot delete an exam that already has attempts' });
     }
     return res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// STUDENT EXAM AND RESULT//
+
+router.get('/api/my/exams', authenticate, async (req: Request, res: Response) => {
+  try {
+    const studentId = (req as any).user.id;
+    const exams = await getAvailableExamsService(studentId);
+    res.json(exams);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+router.get('/api/my/exams/:id', authenticate, async (req: Request, res: Response) => {
+  try {
+    const examId = parseInt(req.params.id as string, 10);
+    if (isNaN(examId)) {
+      return res.status(400).json({ message: 'Invalid ID format' });
+    }
+
+    const examData = await getAvailableExamByIdService(examId);
+    if (!examData) {
+      return res.status(404).json({ message: 'Exam not found or not available' });
+    }
+
+    res.json(examData);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+router.post('/api/my/exams/:id/submit', authenticate, async (req: Request, res: Response) => {
+  try {
+    const examId = parseInt(req.params.id as string, 10);
+    if (isNaN(examId)) {
+      return res.status(400).json({ message: 'Invalid ID format' });
+    }
+
+    const studentId = (req as any).user.id;
+    const answersMap = req.body.answers;
+
+    const result = await submitExamAttemptService(examId, studentId, answersMap);
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+router.get('/api/my/results', authenticate, async (req: Request, res: Response) => {
+  try {
+    const studentId = (req as any).user.id;
+    const results = await getStudentResultsService(studentId);
+    res.json(results);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

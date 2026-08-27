@@ -1,51 +1,21 @@
-import { findQuestionsByExam, createQuestion, modifyQuestion, deleteQuestion, checkExamHasAttempts, findExamIdByQuestion, findExamResults } from '../repository/questionsRepository.js';
+import { findQuestionsByExamId, createQuestionWithChoices, updateQuestionWithChoices, removeQuestion, findExamResults } from '../repository/questionsRepository.js';
 
-export const getQuestions = async (examId: number) => {
-    return await findQuestionsByExam(examId);
+export const getQuestionsService = async (examId: number) => {
+  return await findQuestionsByExamId(examId);
 };
 
-export const createNewQuestion = async (examId: number, data: any) => {
-    const hasAttempts = await checkExamHasAttempts(examId);
-    if (hasAttempts) {
-        throw { status: 409, message: 'Cannot modify questions: exam already has attempts' };
-    }
-    validateChoices(data.choices);
-    return await createQuestion(examId, data);
+export const createQuestionService = async (examId: number, data: any) => {
+  return await createQuestionWithChoices(examId, data);
 };
 
-export const updateQuestion = async (questionId: number, data: any) => {
-    const examId = await findExamIdByQuestion(questionId);
-    if (!examId) throw { status: 404, message: 'Question not found' };
-
-    const hasAttempts = await checkExamHasAttempts(examId);
-    if (hasAttempts) {
-        throw { status: 409, message: 'Cannot modify questions: exam already has attempts ' };
-    }
-    validateChoices(data.choices);
-    return await modifyQuestion(questionId, data);
+export const updateQuestionService = async (questionId: number, data: any) => {
+  return await updateQuestionWithChoices(questionId, data);
 };
 
-export const removeQuestion = async (questionId: number): Promise<boolean> => {
-    const examId = await findExamIdByQuestion(questionId);
-    if (!examId) throw { status: 404, message: 'Question not found' };
-
-    const hasAttempts = await checkExamHasAttempts(examId);
-    if (hasAttempts) {
-        throw { status: 409, message: 'Cannot delete questions: exam already has attempts' };
-    }
-    return await deleteQuestion(questionId);
+export const removeQuestionService = async (questionId: number) => {
+  return await removeQuestion(questionId);
 };
 
-export const getExamResults = async (examId: number) => {
-    return await findExamResults(examId);
+export const getExamResultsService = async (examId: number) => {
+  return await findExamResults(examId);
 };
-
-function validateChoices(choices: { text: string; isCorrect: boolean }[]) {
-    if (!choices || choices.length < 2 || choices.length > 6) {
-        throw { status: 400, message: 'A question must have between 2 and 6 choices' };
-    }
-    const correctChoices = choices.filter(c => c.isCorrect);
-    if (correctChoices.length !== 1) {
-        throw { status: 400, message: 'A question must have exactly one correct choice' };
-    }
-}

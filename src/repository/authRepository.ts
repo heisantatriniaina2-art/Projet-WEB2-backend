@@ -1,5 +1,3 @@
-import 'dotenv/config';
-import type { User } from "../model/usersModel";
 import pg from 'pg';
 
 const pool = new pg.Pool({
@@ -10,23 +8,11 @@ const pool = new pg.Pool({
   database: process.env.DB_NAME || 'gestion_examens'
 });
 
-export const authRepository = {
-    findUserByEmail: async (email: string): Promise<User | null> => {
-        const sql = `
-            SELECT
-                id,
-                first_name AS "firstName",
-                last_name AS "lastName",
-                email,
-                password AS "password",
-                role,
-                is_active AS "isActive"
-            FROM users
-            WHERE email = $1
-        `;
-
-        const result = await pool.query(sql, [email]);
-
-        return result.rows[0] || null;
-    }
+export const findUserByEmail = async (email: string) => {
+  const result = await pool.query(
+    `SELECT id, first_name AS "firstName", last_name AS "lastName", email, password_hash AS "passwordHash", role, is_active AS "isActive" 
+     FROM users WHERE email = $1;`,
+    [email]
+  );
+  return result.rows[0] || null;
 };

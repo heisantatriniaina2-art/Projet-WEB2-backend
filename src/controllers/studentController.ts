@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import { createNewStudent, getAllStudents, removeStudent, updateStudent } from '../services/studentService.js';
+import { createNewStudent, getAllStudents, removeStudent, modifyStudent } from '../services/studentService.js';
 import { authenticate } from '../security/authMiddleware.js';
 
 const router = Router();
@@ -15,17 +15,17 @@ router.get('/api/students', authenticate, async (_req: Request, res: Response) =
 
 router.post('/api/students', authenticate, async (req: Request, res: Response) => {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, email, passwordHash} = req.body;
 
-    if (!firstName || !lastName || !email || !password) {
-      return res.status(400).json({ message: 'Invalid body: firstName, lastName, email and password are required' });
+    if (!firstName || !lastName || !email) {
+      return res.status(400).json({ message: 'Invalid body: firstName, lastName and email are required' });
     }
 
     const newStudent = await createNewStudent({
       firstName,
       lastName,
       email,
-      password,
+      passwordHash: passwordHash || '',
       role: 'student',
       isActive: true
     });
@@ -43,16 +43,16 @@ router.put('/api/students/:id', authenticate, async (req: Request, res: Response
       return res.status(400).json({ message: 'Invalid ID format' });
     }
 
-    const { firstName, lastName, email, password } = req.body;
-    if (!firstName || !lastName || !email || !password) {
-      return res.status(400).json({ message: 'Invalid body: firstName, lastName, email and password are required' });
+    const { firstName, lastName, email, passwordHash } = req.body;
+    if (!firstName || !lastName || !email) {
+      return res.status(400).json({ message: 'Invalid body: firstName, lastName and email  are required' });
     }
 
-    const student = await updateStudent(id, {
+    const student = await modifyStudent(id, {
       firstName,
       lastName,
       email,
-      password,
+      passwordHash: passwordHash || '',
       role: 'student',
       isActive: true
     });

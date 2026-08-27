@@ -5,7 +5,7 @@ export interface User {
     firstName: string;
     lastName: string;
     email: string;
-    password: string;
+    passwordHash: string;
     role: UserRole;
     isActive: boolean;
     createdAt: Date;

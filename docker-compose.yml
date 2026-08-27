@@ -1,19 +1,18 @@
+version: '3.8'
+
 services:
   postgres:
-    image: postgres:16
-    container_name: exam-hub-postgres
-    restart: unless-stopped
-
+    image: postgres:15-alpine
+    container_name: gestion_examens_db
     environment:
-      POSTGRES_DB: examhub
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 42689
-
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: gestion_examens
     ports:
       - "5432:5432"
-
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./database:/init-scripts
 
 volumes:
   postgres_data:
