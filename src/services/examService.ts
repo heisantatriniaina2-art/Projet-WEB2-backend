@@ -1,7 +1,8 @@
-import type { Exam } from '../model/examModel.js';
-import { createExam, deleteExam, findAllExams, findExamById, modifyExam, countExamAttempts,
+import type { Exam } from '../model/examModel';
+import {
+  createExam, deleteExam, findAllExams, findExamById, modifyExam, countExamAttempts,
   findAllAvailableExams, findAvailableExamById, submitAttempt, findAllStudentResults
- } from '../repository/examRepository.js';
+} from '../repository/examRepository';
 
 export const getAllExams = async (): Promise<Exam[]> => {
   return await findAllExams();
@@ -14,7 +15,7 @@ export const getExamById = async (id: number): Promise<Exam | null> => {
 export const createNewExam = async (examData: Omit<Exam, 'id'>): Promise<Exam> => {
   const start = new Date(examData.startsAt);
   const end = new Date(examData.endsAt);
-  
+
   if (isNaN(start.getTime()) || isNaN(end.getTime()) || start >= end) {
     throw new Error('INVALID_DATES');
   }
@@ -25,7 +26,7 @@ export const createNewExam = async (examData: Omit<Exam, 'id'>): Promise<Exam> =
 export const updateExam = async (id: number, examData: Omit<Exam, 'id'>): Promise<Exam | null> => {
   const start = new Date(examData.startsAt);
   const end = new Date(examData.endsAt);
-  
+
   if (isNaN(start.getTime()) || isNaN(end.getTime()) || start >= end) {
     throw new Error('INVALID_DATES');
   }
@@ -52,8 +53,6 @@ export const removeExam = async (id: number): Promise<boolean> => {
   return await deleteExam(id);
 };
 
-
-// STUDENT EXAM AND RESULT //
 
 export const getAvailableExamsService = async (studentId: number) => {
   return await findAllAvailableExams(studentId);

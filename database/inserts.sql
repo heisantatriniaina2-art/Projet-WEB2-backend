@@ -30,7 +30,7 @@ VALUES
 INSERT INTO courses (code, name, description)
 VALUES
 (
-    'PROG2',
+    'POO',
     'Programmation 2',
     'Cours de programmation avancée'
 ),
