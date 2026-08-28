@@ -15,37 +15,27 @@ export const authenticate = (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-) => {
+): void => {
   if (!JWT_SECRET) {
-    return res.status(500).json({
-      message: "JWT_SECRET does not configured",
+    res.status(500).json({
+      message: "JWT_SECRET is not configured",
     });
+    return;
   }
 
   const authHeader = req.headers.authorization;
 
-  if (!authHeader) {
-    return res.status(401).json({
-      message: "Missing token",
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    res.status(401).json({
+      message: "Missing or invalid token format",
     });
-  }
-
-  if (!authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({
-      message: "Invalide token format",
-    });
+    return;
   }
 
   const token = authHeader.split(" ")[1];
 
-  if (!token) {
-    return res.status(401).json({
-      message: "Missing token",
-    });
-  }
-
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const decoded = jwt.verify(token as string, JWT_SECRET) as any;
 
     if (
       typeof decoded !== "object" ||
@@ -54,15 +44,17 @@ export const authenticate = (
       (decoded.role !== "admin" && decoded.role !== "student") ||
       typeof decoded.isActive !== "boolean"
     ) {
-      return res.status(401).json({
-        message: "Invalid token",
+      res.status(401).json({
+        message: "Invalid token structure",
       });
+      return;
     }
 
     if (!decoded.isActive) {
-      return res.status(403).json({
+      res.status(403).json({
         message: "Your account has been deactivated",
       });
+      return;
     }
 
     req.user = {
@@ -73,7 +65,7 @@ export const authenticate = (
 
     next();
   } catch (error) {
-    return res.status(401).json({
+    res.status(401).json({
       message: "Invalid or expired token",
     });
   }

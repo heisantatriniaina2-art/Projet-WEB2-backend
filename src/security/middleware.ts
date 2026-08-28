@@ -1,22 +1,23 @@
-import type { Request, Response, NextFunction } from "express";
+import type { Response, NextFunction } from "express";
+import type { AuthRequest } from "./authMiddleware";
 
 export const requireAdmin = (
-    req: Request,
+    req: AuthRequest,
     res: Response,
     next: NextFunction
 ): void => {
-    const user = (req as any).user;
+    const user = req.user;
 
     if (!user) {
         res.status(401).json({
-            message: "Utilisateur non authentifié"
+            message: "User didn't authentifi"
         });
         return;
     }
 
     if (user.role !== "admin") {
         res.status(403).json({
-            message: "Accès réservé à l'administrateur"
+            message: "Access reserved for administrator"
         });
         return;
     }
@@ -25,22 +26,15 @@ export const requireAdmin = (
 };
 
 export const requireStudent = (
-    req: Request,
+    req: AuthRequest,
     res: Response,
     next: NextFunction
 ): void => {
-    const user = (req as any).user;
+    const user = req.user;
 
     if (!user) {
         res.status(401).json({
-            message: "Utilisateur non authentifié"
-        });
-        return;
-    }
-
-    if (user.role !== "student") {
-        res.status(403).json({
-            message: "Accès réservé à l'étudiant"
+            message: "User didn't  authenticate"
         });
         return;
     }
