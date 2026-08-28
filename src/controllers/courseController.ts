@@ -1,11 +1,10 @@
 import { Router, type Request, type Response } from 'express';
 import { createCourse, getAllCourses, removeCourse, modifyCourse } from '../services/courseService.js';
 import { authenticate } from '../security/authMiddleware.js';
-import { requireAdmin } from '../security/middleware.js';
 
 const router = Router();
 
-router.get('/api/courses', authenticate, requireAdmin, async (_req: Request, res: Response) => {
+router.get('/api/courses', authenticate, async (_req: Request, res: Response) => {
   try {
     const courses = await getAllCourses();
     res.json(courses);
@@ -14,7 +13,7 @@ router.get('/api/courses', authenticate, requireAdmin, async (_req: Request, res
   }
 });
 
-router.post('/api/courses', authenticate, requireAdmin, async (req: Request, res: Response) => {
+router.post('/api/courses', authenticate, async (req: Request, res: Response) => {
   try {
     const { code, name, description } = req.body;
     if (!code || !name || !description) {
@@ -28,7 +27,7 @@ router.post('/api/courses', authenticate, requireAdmin, async (req: Request, res
   }
 });
 
-router.put('/api/courses/:id', authenticate, requireAdmin, async (req: Request, res: Response) => {
+router.put('/api/courses/:id', authenticate, async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) {
@@ -51,7 +50,7 @@ router.put('/api/courses/:id', authenticate, requireAdmin, async (req: Request, 
   }
 });
 
-router.delete('/api/courses/:id', authenticate, requireAdmin, async (req: Request, res: Response) => {
+router.delete('/api/courses/:id', authenticate, async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) {

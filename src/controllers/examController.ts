@@ -3,10 +3,11 @@ import { createNewExam, getAllExams, getExamById, removeExam, updateExam,
   getAvailableExamsService, getAvailableExamByIdService, submitExamAttemptService, getStudentResultsService
  } from '../services/examService.js';
 import { authenticate } from '../security/authMiddleware.js';
+import { requireAdmin, requireStudent } from '../security/middleware.js';
 
 const router = Router();
 
-router.get('/api/exams', authenticate, async (_req: Request, res: Response) => {
+router.get('/api/exams', authenticate, requireAdmin,async (_req: Request, res: Response) => {
   try {
     const exams = await getAllExams();
     return res.json(exams);
@@ -15,7 +16,7 @@ router.get('/api/exams', authenticate, async (_req: Request, res: Response) => {
   }
 });
 
-router.get('/api/exams/:id', authenticate, async (req: Request, res: Response) => {
+router.get('/api/exams/:id', authenticate, requireAdmin, async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) {
@@ -33,7 +34,7 @@ router.get('/api/exams/:id', authenticate, async (req: Request, res: Response) =
   }
 });
 
-router.post('/api/exams', authenticate, async (req: Request, res: Response) => {
+router.post('/api/exams', authenticate, requireAdmin, async (req: Request, res: Response) => {
   try {
     const { title, startsAt, endsAt, courseId } = req.body;
 
@@ -51,7 +52,7 @@ router.post('/api/exams', authenticate, async (req: Request, res: Response) => {
   }
 });
 
-router.put('/api/exams/:id', authenticate, async (req: Request, res: Response) => {
+router.put('/api/exams/:id', authenticate, requireAdmin, async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) {
@@ -80,7 +81,7 @@ router.put('/api/exams/:id', authenticate, async (req: Request, res: Response) =
   }
 });
 
-router.delete('/api/exams/:id', authenticate, async (req: Request, res: Response) => {
+router.delete('/api/exams/:id', authenticate, requireAdmin, async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) {
@@ -102,7 +103,7 @@ router.delete('/api/exams/:id', authenticate, async (req: Request, res: Response
 
 // STUDENT EXAM AND RESULT//
 
-router.get('/api/my/exams', authenticate, async (req: Request, res: Response) => {
+router.get('/api/my/exams', authenticate, requireStudent, async (req: Request, res: Response) => {
   try {
     const studentId = (req as any).user.id;
     const exams = await getAvailableExamsService(studentId);
@@ -112,7 +113,7 @@ router.get('/api/my/exams', authenticate, async (req: Request, res: Response) =>
   }
 });
 
-router.get('/api/my/exams/:id', authenticate, async (req: Request, res: Response) => {
+router.get('/api/my/exams/:id', authenticate, requireStudent, async (req: Request, res: Response) => {
   try {
     const examId = parseInt(req.params.id as string, 10);
     if (isNaN(examId)) {
@@ -130,7 +131,7 @@ router.get('/api/my/exams/:id', authenticate, async (req: Request, res: Response
   }
 });
 
-router.post('/api/my/exams/:id/submit', authenticate, async (req: Request, res: Response) => {
+router.post('/api/my/exams/:id/submit', authenticate, requireStudent, async (req: Request, res: Response) => {
   try {
     const examId = parseInt(req.params.id as string, 10);
     if (isNaN(examId)) {
@@ -147,7 +148,7 @@ router.post('/api/my/exams/:id/submit', authenticate, async (req: Request, res: 
   }
 });
 
-router.get('/api/my/results', authenticate, async (req: Request, res: Response) => {
+router.get('/api/my/results', authenticate, requireStudent, async (req: Request, res: Response) => {
   try {
     const studentId = (req as any).user.id;
     const results = await getStudentResultsService(studentId);

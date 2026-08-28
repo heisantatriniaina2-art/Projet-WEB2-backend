@@ -1,11 +1,10 @@
 import { Router, type Request, type Response } from 'express';
 import { createNewStudent, getAllStudents, removeStudent, modifyStudent } from '../services/studentService.js';
 import { authenticate } from '../security/authMiddleware.js';
-import { requireAdmin } from '../security/middleware.js';
 
 const router = Router();
 
-router.get('/api/students', authenticate, requireAdmin, async (_req: Request, res: Response) => {
+router.get('/api/students', authenticate, async (_req: Request, res: Response) => {
   try {
     const students = await getAllStudents();
     res.json(students);
@@ -14,7 +13,7 @@ router.get('/api/students', authenticate, requireAdmin, async (_req: Request, re
   }
 });
 
-router.post('/api/students', authenticate, requireAdmin, async (req: Request, res: Response) => {
+router.post('/api/students', authenticate, async (req: Request, res: Response) => {
   try {
     const { firstName, lastName, email, passwordHash} = req.body;
 
@@ -37,7 +36,7 @@ router.post('/api/students', authenticate, requireAdmin, async (req: Request, re
   }
 });
 
-router.put('/api/students/:id', authenticate, requireAdmin, async (req: Request, res: Response) => {
+router.put('/api/students/:id', authenticate, async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) {
@@ -67,7 +66,7 @@ router.put('/api/students/:id', authenticate, requireAdmin, async (req: Request,
   }
 });
 
-router.delete('/api/students/:id', authenticate, requireAdmin, async (req: Request, res: Response) => {
+router.delete('/api/students/:id', authenticate, async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) {

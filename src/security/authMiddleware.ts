@@ -50,6 +50,7 @@ export const authenticate = (
       return;
     }
 
+    // RG-11 : Compte désactivé
     if (!decoded.isActive) {
       res.status(403).json({
         message: "Your account has been deactivated",
